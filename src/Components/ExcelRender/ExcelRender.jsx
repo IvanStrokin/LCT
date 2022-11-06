@@ -7,28 +7,26 @@ export default class ExcelPage extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            selectedRowKeys: [],
+            loading : false,
             cols: [],
             rows: [],
+            newSelectedRowKeys : null,
             errorMessage: null,
             columns: [
-                {
-                    title: "№",
-                    dataIndex: "number",
-                    editable: true
-                },
                 {
                     title: "Местоположение",
                     dataIndex: "location",
                     editable: true
                 },
                 {
-                    title: "Стоимость",
-                    dataIndex: "cost",
+                    title: "Количество комнат",
+                    dataIndex: "numberOfRooms",
                     editable: true
                 },
                 {
-                    title: "Удаленность от станции метро",
-                    dataIndex: "distance",
+                    title: "Сегмент",
+                    dataIndex: "segment",
                     editable: true
                 },
                 {
@@ -37,8 +35,13 @@ export default class ExcelPage extends Component {
                     editable: true
                 },
                 {
+                    title: "Материал стен",
+                    dataIndex: "wallMaterial",
+                    editable: true
+                },
+                {
                     title: "Этаж расположения",
-                    dataIndex: "locationFloor",
+                    dataIndex: "floorLocation",
                     editable: true
                 },
                 {
@@ -57,41 +60,40 @@ export default class ExcelPage extends Component {
                     editable: true
                 },
                 {
+                    title: "Удаленность от станции метро",
+                    dataIndex: "distance",
+                    editable: true
+                },
+                {
                     title: "Состояние",
                     dataIndex: "condition",
                     editable: true
                 },
                 {
-                    title: "Материал стен",
-                    dataIndex: "wallMaterial",
-                    editable: true
-                },
-                {
-                    title: "Сегмент",
-                    dataIndex: "segment",
-                    editable: true
-                },
-                {
-                    title: "Количество комнат",
-                    dataIndex: "numberOfRooms",
-                    editable: true
-                },
-                {
-                    title: "Action",
+                    title: "Действия",
                     dataIndex: "action",
                     render: (text, record) =>
                         this.state.rows.length >= 1 ? (
-                            <Popconfirm
-                                title="Sure to delete?"
-                                onConfirm={() => this.handleDelete(record.key)}
-                            >
-                                <Icon
-                                    type="delete"
-                                    theme="filled"
-                                    style={{ color: "red", fontSize: "20px" }}
-                                />
-                            </Popconfirm>
-                        ) : null
+                            <div>
+                                <div>
+                                    <Popconfirm
+                                        title="Точно удалить?"
+                                        onConfirm={() => this.handleDelete(record.key)}
+                                    >
+                                        <Icon
+                                            type="delete"
+                                            theme="filled"
+                                            style={{ color: "red", fontSize: "20px" }}
+                                        />
+                                    </Popconfirm>
+                                </div>
+                            </div>
+
+
+
+
+                        ) : null,
+
                 }
             ]
         };
@@ -107,27 +109,6 @@ export default class ExcelPage extends Component {
         });
         this.setState({ rows: newData });
     };
-
-    checkFile(file) {
-        let errorMessage = "";
-        if (!file || !file[0]) {
-            return;
-        }
-        const isExcel =
-            file[0].type === "application/vnd.ms-excel" ||
-            file[0].type ===
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-        if (!isExcel) {
-            errorMessage = "You can only upload Excel file!";
-        }
-        console.log("file", file[0].type);
-        const isLt2M = file[0].size / 1024 / 1024 < 2;
-        if (!isLt2M) {
-            errorMessage = "File must be smaller than 2MB!";
-        }
-        console.log("errorMessage", errorMessage);
-        return errorMessage;
-    }
 
     fileHandler = fileList => {
         console.log("fileList", fileList);
@@ -151,7 +132,7 @@ export default class ExcelPage extends Component {
             });
             return false;
         }
-        //just pass the fileObj as parameter
+
         ExcelRenderer(fileObj, (err, resp) => {
             if (err) {
                 console.log(err);
@@ -161,19 +142,17 @@ export default class ExcelPage extends Component {
                     if (row && row !== "undefined") {
                         newRows.push({
                             key: index,
-                            number: row[0],
-                            location: row[1],
-                            cost: row[2],
-                            distance: row[3],
-                            floors: row[4],
-                            locationFloor: row[5],
+                            location : row[0],
+                            numberOfRooms: row[1],
+                            segment: row[2],
+                            floors: row[3],
+                            wallMaterial: row[4],
+                            floorLocation : row[5],
                             square: row[6],
                             square1: row[7],
                             balcony: row[8],
-                            condition: row[9],
-                            wallMaterial: row[10],
-                            segment: row[11],
-                            numberOfRooms: row[12],
+                            distance: row[9],
+                            condition: row[10],
                         });
                     }
                 });
@@ -196,23 +175,30 @@ export default class ExcelPage extends Component {
 
     handleSubmit = async () => {
         console.log("submitting: ", this.state.rows);
-
         //submit to API
-        //if successful, banigate and clear the data
-        //this.setState({ rows: [] })
+        //Если успешно, поменять исходный пулл на пулл от бэков
+        //this.setState({ })
+    };
+
+    handleSubmit1 = async () => {
+        console.log("submitting: ", this.state.selectedKeys);
+        //Отправить пулл выбранных обьектов на сервер
+        //
     };
 
     handleDelete = key => {
         const rows = [...this.state.rows];
         this.setState({ rows: rows.filter(item => item.key !== key) });
     };
+
+    handleSelect = key => {
+        this.setState({ rows: [] })
+    };
+
     handleAdd = () => {
         const { count, rows } = this.state;
         const newData = {
             key: count,
-            name: "User's name",
-            age: "22",
-            gender: "Female"
         };
         this.setState({
             rows: [newData, ...rows],
@@ -238,13 +224,16 @@ export default class ExcelPage extends Component {
                     editable: col.editable,
                     dataIndex: col.dataIndex,
                     title: col.title,
-                    handleSave: this.handleSave
+                    handleSave: this.handleSave,
                 })
             };
         });
+
+
+
         return (
             <>
-                <h1>Importing Excel Component</h1>
+                <h1>Тестовый образец</h1>
                 <Row gutter={16}>
                     <Col
                         span={8}
@@ -256,18 +245,11 @@ export default class ExcelPage extends Component {
                         }}
                     >
                         <div style={{ display: "flex", alignItems: "center" }}>
-                            <div className="page-title">Upload Farmer Data</div>
+                            <div className="page-title">Сервис для
+                                расчета рыночной стоимости
+                                жилой недвижимости
+                                города Москва</div>
                         </div>
-                    </Col>
-                    <Col span={8}>
-                        <a
-                            href="https://res.cloudinary.com/bryta/raw/upload/v1562751445/Sample_Excel_Sheet_muxx6s.xlsx"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            download
-                        >
-                            Sample excel sheet
-                        </a>
                     </Col>
                     <Col
                         span={8}
@@ -283,7 +265,7 @@ export default class ExcelPage extends Component {
                                     style={{ marginBottom: 16 }}
                                 >
                                     <Icon type="plus" />
-                                    Add a row
+                                    Добавить объект
                                 </Button>{" "}
                                 <Button
                                     onClick={this.handleSubmit}
@@ -291,12 +273,15 @@ export default class ExcelPage extends Component {
                                     type="primary"
                                     style={{ marginBottom: 16, marginLeft: 10 }}
                                 >
-                                    Submit Data
+                                    Рассчитать пулл обьектов
                                 </Button>
                             </>
                         )}
                     </Col>
                 </Row>
+                <Button type="primary" onClick={this.handleSubmit1} disabled={this.state.selectedRowKeys.length > 0} loading={this.loading}>
+                    Рассчитать по эталонным обьектам
+                </Button>
                 <div>
                     <Upload
                         name="file"
@@ -305,8 +290,12 @@ export default class ExcelPage extends Component {
                         multiple={false}
                         accept='.xlsx'
                     >
-                        <Button >
-                            <Icon type="upload"/> Click to Upload Excel File
+                        <Button>
+                            <Icon type="upload"/> Нажмите, чтобы загрузить исходный пулл обьектов
+                            <Icon
+                                type='file-excel'
+                                size="large"
+                            />
                         </Button>
                     </Upload>
                 </div>
@@ -316,6 +305,7 @@ export default class ExcelPage extends Component {
                         rowClassName={() => "editable-row"}
                         dataSource={this.state.rows}
                         columns={columns}
+                        rowSelection={{}}
                     />
                 </div>
             </>

@@ -5,17 +5,21 @@
   "keywords": [],
   "main": "src/index.js",
   "dependencies": {
-    "antd": "3.20.1",
+    "@2gis/mapgl": "^1.31.1",
+    "ant-design": "^1.0.0",
+    "antd": "^3.20.1",
     "cors": "^2.8.5",
     "express": "^4.18.2",
-    "react": "16.8.6",
+    "react": "^16.8.6",
     "react-dom": "16.8.6",
     "react-excel-renderer": "1.1.0",
+    "react-hook-form": "^7.39.1",
+    "react-hooks-useform": "^0.1.86",
     "react-router-dom": "^6.4.2",
     "react-scripts": "3.0.1"
   },
   "devDependencies": {
-    "typescript": "3.3.3",
+    "typescript": "^3.3.3",
     "web-vitals": "^3.0.4"
   },
   "scripts": {

@@ -5,6 +5,7 @@ import Login from "./Components/Login/Login";
 import useToken from "./Components/useToken/useToken";
 import ExcelPage from "./Components/ExcelRender/ExcelRender";
 import "antd/dist/antd.css";
+import {Map} from "./Components/Map/Map";
 
 function App() {
     const { token, setToken } = useToken();
